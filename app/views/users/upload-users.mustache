@@ -38,6 +38,12 @@
 <div id="app" class="card-body">
     <form class="row g-3" id="form" method="post" enctype="multipart/form-data" @submit.prevent="onSubmit" novalidate>
         <div class="mb-3">
+			<a class="btn btn-primary" href="{{ base_url }}users/download-example" target="_blank" rel="noopener noreferrer">
+				Example text file
+			</a>
+        </div>
+
+        <div class="mb-3">
             <label class="control-label" for="file">File *</label>
 			<input class="form-control" type="file" name="file" id="file" accept=".csv, text/csv" required>
 			<div class="invalid-feedback">
@@ -78,6 +84,15 @@
 			<div class="text-danger">
 				{{# errors }}password{{/ errors }}
 			</div>
+		</div>
+
+		<div class="mb-3">
+			<label class="control-label" for="forcepasschange">Force password change</label>
+			<br />
+			<label class="switch">
+				<input type="checkbox" name="forcepasschange" id="forcepasschange">
+				<span class="slider round"></span>
+			</label>
 		</div>
 
         <div id="spinner" class="mb-3 text-center" style="display: none;">

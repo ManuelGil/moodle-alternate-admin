@@ -1,7 +1,7 @@
 {
 	"name": "manuelgil/moodle-alternate-admin",
 	"description": "This wrapper for Moodle adds a new interface to streamline your administrative tasks.",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"type": "project",
 	"keywords": [
 		"php",

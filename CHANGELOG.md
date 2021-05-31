@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2021-05-31
+
+### Added
+
+-   Add "Force password change" option in "Upload Users" subsection.
+
 ## [1.0.0] - 2021-05-30
 
 _Initial major release.._
 
-[unreleased]: https://github.com/ManuelGil/moodle-alternate-admin/compare/v1.0.0...HEAD
+[unreleased]: https://github.com/ManuelGil/moodle-alternate-admin/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/ManuelGil/moodle-alternate-admin/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/ManuelGil/moodle-alternate-admin/releases/tag/v1.0.0

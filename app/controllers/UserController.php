@@ -517,7 +517,8 @@ class UserController extends BaseController
 				['delimiter']
 			],
 			'optional' => [
-				['unique']
+				['unique'],
+				['forcepasschange']
 			]
 		]);
 
@@ -560,15 +561,24 @@ class UserController extends BaseController
 						$data->lastname = trim($row[2]);
 						// Set the email.
 						$data->email = trim($row[3]);
+
 						// Set the auth.
-						$data->auth = trim($row[4]);
+						if (isset($row[4])) {
+							$data->auth = trim($row[4]);
+						} else {
+							$data->auth = 'manual';
+						}
 
 						// Set a password.
 						if (isset($_POST['unique']) && !empty($_POST['password'])) {
 							$password = $_POST['password'];
 						} else {
-							$chars = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcefghijklmnopqrstuvwxyz';
-							$password = substr(str_shuffle($chars), 0, 7);
+							if (isset($row[5])) {
+								$password = $row[5];
+							} else {
+								$chars = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcefghijklmnopqrstuvwxyz';
+								$password = substr(str_shuffle($chars), 0, 7);
+							}
 						}
 
 						$data->password = password_hash($password, PASSWORD_DEFAULT, array());
@@ -584,6 +594,25 @@ class UserController extends BaseController
 									<td>{$row[0]}</td>
 									<td>{$password}</td>
 								</tr>";
+
+						if (isset($_POST['forcepasschange'])) {
+							$data = new \stdClass();
+
+							$data->userid = $userid;
+							$data->name = 'auth_forcepasswordchange';
+							$data->value = 1;
+
+							try {
+								$transaction = $DB->start_delegated_transaction();
+								$DB->insert_record('user_preferences', $data);
+								$transaction->allow_commit();
+							} catch (\Throwable $e) {
+								// Make sure transaction is valid.
+								if (!empty($transaction) && !$transaction->is_disposed()) {
+									$transaction->rollback($e);
+								}
+							}
+						}
 
 						// Add one user to the count.
 						$successes++;
@@ -938,6 +967,52 @@ class UserController extends BaseController
 		header('Pragma: public');
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		header('Content-Disposition: attachment;filename=user.csv');
+		header('Cache-Control: max-age=0');
+
+		$writer->save('php://output');
+	}
+
+	/**
+	 * This method load the 'download-example' route. <br/>
+	 * <b>post: </b>access to GET method. <br/>
+	 * <b>post: </b>Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.
+	 */
+	public function getDownloadExample()
+	{
+		global $DB;
+
+		$spreadsheet = new Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+
+		$users = $DB->get_records('user');
+
+		$sheet->setCellValue('A1', 'username1');
+		$sheet->setCellValue('A2', 'username2');
+		$sheet->setCellValue('A3', 'username3');
+		$sheet->setCellValue('B1', 'first name one');
+		$sheet->setCellValue('B2', 'first name two');
+		$sheet->setCellValue('B3', 'first name three');
+		$sheet->setCellValue('C1', 'surname one');
+		$sheet->setCellValue('C2', 'surname two');
+		$sheet->setCellValue('C3', 'surname three');
+		$sheet->setCellValue('D1', 'mail1@example.com');
+		$sheet->setCellValue('D2', 'mail2@example.com');
+		$sheet->setCellValue('D3', 'mail3@example.com');
+		$sheet->setCellValue('E1', 'auth (optional)');
+		$sheet->setCellValue('E2', 'auth (optional)');
+		$sheet->setCellValue('E3', 'auth (optional)');
+		$sheet->setCellValue('F1', 'p4ssw0rD (optional)');
+		$sheet->setCellValue('F2', 'p4ssw0rD (optional)');
+		$sheet->setCellValue('F3', 'p4ssw0rD (optional)');
+
+		$writer = new Csv($spreadsheet);
+
+		header('Content-Description: File Transfer');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate');
+		header('Pragma: public');
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header('Content-Disposition: attachment;filename=example.csv');
 		header('Cache-Control: max-age=0');
 
 		$writer->save('php://output');
