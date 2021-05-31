@@ -1,0 +1,189 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+
+{{% BLOCKS }}
+{{< layout }}
+
+{{$ title }}Switch Role{{/ title }}
+
+{{$ stylesheets }}
+{{/ stylesheets }}
+
+{{$ pageheader }}Switch Role{{/ pageheader }}
+
+{{$ alerts }}
+{{# message }}success{{/ message }}
+{{# message }}danger{{/ message }}
+{{# message }}info{{/ message }}
+{{/ alerts }}
+
+{{$ content }}
+<div class="card-header">
+	<h5 class="card-title mb-0">Switch roles of users by course</h5>
+</div>
+<div id="app" class="card-body">
+    <form class="row g-3" id="form" method="post" @submit.prevent="onSubmit" novalidate>
+        <div class="mb-3">
+            <label class="control-label" for="course">Courses *</label>
+            <select id="course" required>
+				<option data-placeholder="true"></option>
+                <option v-for="course in courses" :value="course.id">
+                    ${ course.fullname } - ${ course.shortname }
+                </option>
+            </select>
+			<div class="invalid-feedback">
+				This field is required
+			</div>
+			<div class="text-danger">
+				{{# errors }}course{{/ errors }}
+			</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="control-label" for="users">Users *</label>
+            <select name="users[]" id="users" multiple required>
+            </select>
+			<div class="invalid-feedback">
+				This field is required
+			</div>
+			<div class="text-danger">
+				{{# errors }}users{{/ errors }}
+			</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="control-label" for="role">Role *</label>
+            <select name="role" id="role" required>
+				<option data-placeholder="true"></option>
+                <option v-for="(role, index) in roles" :value="index">
+                    ${ role }
+                </option>
+            </select>
+			<div class="invalid-feedback">
+				This field is required
+			</div>
+			<div class="text-danger">
+				{{# errors }}role{{/ errors }}
+			</div>
+        </div>
+
+        <div id="spinner" class="mb-3 text-center" style="display: none;">
+            <i class="fa fa-spinner fa-3x fa-pulse"></i>
+            <p>Wait, in progress...</p>
+        </div>
+
+        <div class="mb-3">
+            <button id="btnSubmit" type="submit" class="btn btn-primary">SUBMIT</button>
+        </div>
+   </form>
+</div>
+{{/ content }}
+
+{{$ scripts }}
+{{! development version, includes helpful console warnings }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.27.0/slimselect.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.27.0/slimselect.min.css" rel="stylesheet"></link>
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        delimiters: ['${', '}'],
+        data: function () {
+            return {
+                courses: [],
+				users: [],
+				roles: []
+            }
+        },
+        created: function () {
+            this.load()
+        },
+        mounted: function () {
+            new SlimSelect({
+                select: document.querySelector('#course'),
+                placeholder: 'Select a course',
+                hideSelectedOption: true,
+                closeOnSelect: true,
+				onChange: (info) => {
+                    if (info.value) {
+                        axios.get(`{{ base_url }}enrollments/list-assignments/${info.value}`)
+                            .then(response => {
+                                if (response.status == 200) {
+                                    const users = Object.values(response.data).map(user => {
+										return {
+											value: user.id,
+											text: `${ user.username } - ${ user.firstname } ${ user.lastname } - ${ user.email } - ${ user.role }`
+										}
+									})
+                                    enrolleds.setData(users)
+                                }
+                            })
+					}
+				}
+            })
+
+            var enrolleds = new SlimSelect({
+                select: document.querySelector('#users'),
+                placeholder: 'Select an user',
+                hideSelectedOption: true,
+                closeOnSelect: false
+            })
+
+            new SlimSelect({
+                select: document.querySelector('#role'),
+                placeholder: 'Select a role',
+                hideSelectedOption: true,
+                closeOnSelect: true
+            })
+        },
+        methods: {
+            load: function () {
+                this.courses = JSON.parse("{{{ courses }}}")
+                this.roles = JSON.parse("{{{ roles }}}")
+            },
+            onSubmit: function () {
+				var form = document.querySelector("#form")
+
+				form.classList.add('was-validated')
+
+				if (form.checkValidity()) {
+					swal({
+						text: "Are you sure you want to do this?",
+						icon: "warning",
+						buttons: true,
+						dangerMode: true
+					})
+					.then((value) => {
+						if (value) {
+							document.querySelector('#btnSubmit').disabled = true
+							document.querySelector('#spinner').style.display = 'block'
+							form.submit()
+						}
+					})
+				}
+            }
+        }
+    })
+</script>
+{{/ scripts }}
+{{/ layout }}

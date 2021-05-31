@@ -1,0 +1,178 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+
+{{% BLOCKS }}
+{{< layout }}
+
+{{$ title }}Upload Users{{/ title }}
+
+{{$ stylesheets }}
+{{/ stylesheets }}
+
+{{$ pageheader }}Upload Users{{/ pageheader }}
+
+{{$ alerts }}
+{{# message }}success{{/ message }}
+{{# message }}danger{{/ message }}
+{{# message }}info{{/ message }}
+{{/ alerts }}
+
+{{$ content }}
+<div class="card-header">
+	<h5 class="card-title mb-0">Upload Users</h5>
+</div>
+<div id="app" class="card-body">
+    <form class="row g-3" id="form" method="post" enctype="multipart/form-data" @submit.prevent="onSubmit" novalidate>
+        <div class="mb-3">
+            <label class="control-label" for="file">File *</label>
+			<input class="form-control" type="file" name="file" id="file" accept=".csv, text/csv" required>
+			<div class="invalid-feedback">
+				This field is required
+			</div>
+			<div class="text-danger">
+				{{# errors }}file{{/ errors }}
+			</div>
+        </div>
+
+		<div class="mb-3">
+			<label class="control-label" for="delimiter">CSV delimiter</label>
+			<select class="form-control" name="delimiter" id="delimiter">
+				<option value="," selected>,</option>
+				<option value=";">;</option>
+				<option value=":">:</option>
+				<option value="\t">\t</option>
+			</select>
+		</div>
+
+		<div class="mb-3">
+			<label class="control-label" for="unique">Use a unique password for all</label>
+			<br/>
+			<label class="switch">
+				<input type="checkbox" name="unique" id="unique" :checked="unique"
+  					@input="unique = $event.target.checked">
+				<span class="slider round"></span>
+			</label>
+			<div class="text-danger">
+				{{# errors }}unique{{/ errors }}
+			</div>
+		</div>
+
+		<div v-show="unique" class="mb-3">
+			<label class="control-label" for="password">New password</label>
+			<i class="icon fa fa-eye fa-fw" id="eye" @click="showPass()"></i>
+			<input class="form-control" type="password" name="password" id="password" placeholder="Click to enter text 🖊">
+			<div class="text-danger">
+				{{# errors }}password{{/ errors }}
+			</div>
+		</div>
+
+        <div id="spinner" class="mb-3 text-center" style="display: none;">
+            <i class="fa fa-spinner fa-3x fa-pulse"></i>
+            <p>Wait, in progress...</p>
+        </div>
+
+        <div class="mb-3">
+            <button id="btnSubmit" type="submit" class="btn btn-primary">SUBMIT</button>
+        </div>
+    </form>
+</div>
+
+<style>
+.switch{position:relative;display:inline-block;width:60px;height:34px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#ccc;-webkit-transition:.4s;transition:.4s}
+.slider:before{position:absolute;content:"";height:26px;width:26px;left:4px;bottom:4px;background-color:#fff;-webkit-transition:.4s;transition:.4s}
+input:checked+.slider{background-color:#2196f3}
+input:focus+.slider{box-shadow:0 0 1px #2196f3}
+input:checked+.slider:before{-webkit-transform:translateX(26px);-ms-transform:translateX(26px);transform:translateX(26px)}
+.slider.round{border-radius:34px}
+.slider.round:before{border-radius:50%}
+</style>
+{{/ content }}
+
+{{$ scripts }}
+{{! development version, includes helpful console warnings }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.27.0/slimselect.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.27.0/slimselect.min.css" rel="stylesheet"></link>
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        delimiters: ['${', '}'],
+        data: function () {
+            return {
+				users: [],
+				unique: false
+            }
+        },
+        created: function () {
+            this.load()
+        },
+        mounted: function () {
+            new SlimSelect({
+                select: document.querySelector('#users'),
+                placeholder: 'Select an user',
+                hideSelectedOption: true,
+                closeOnSelect: false
+            })
+        },
+        methods: {
+            load: function () {
+                this.users = JSON.parse("{{{ users }}}")
+            },
+			showPass: function () {
+				const input = document.querySelector('#password')
+				const eye = document.querySelector('#eye')
+
+				if (input.type == 'password') {
+					input.type = 'text'
+					eye.style.color = 'blue'
+				} else {
+					input.type = 'password'
+					eye.style.color = '#868ba1'
+				}
+			},
+            onSubmit: function () {
+				var form = document.querySelector("#form")
+
+				form.classList.add('was-validated')
+
+				if (form.checkValidity()) {
+					swal({
+						text: "Are you sure you want to do this?",
+						icon: "warning",
+						buttons: true,
+						dangerMode: true
+					})
+					.then((value) => {
+						if (value) {
+							document.querySelector('#btnSubmit').disabled = true
+							document.querySelector('#spinner').style.display = 'block'
+							form.submit()
+						}
+					})
+				}
+            }
+        }
+    })
+</script>
+{{/ scripts }}
+{{/ layout }}

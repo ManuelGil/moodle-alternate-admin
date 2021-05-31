@@ -1,0 +1,196 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+
+{{% BLOCKS }}
+{{< layout }}
+
+{{$ title }}Bulk User Creation{{/ title }}
+
+{{$ stylesheets }}
+{{/ stylesheets }}
+
+{{$ pageheader }}Bulk User Creation{{/ pageheader }}
+
+{{$ alerts }}
+{{# message }}success{{/ message }}
+{{# message }}danger{{/ message }}
+{{# message }}info{{/ message }}
+{{/ alerts }}
+
+{{$ content }}
+<div class="card-header">
+	<h5 class="card-title mb-0">Create a large number of users</h5>
+</div>
+<div id="app" class="card-body">
+    <form class="row g-3" id="form" method="post" @submit.prevent="onSubmit" novalidate>
+        <div class="mb-3">
+            <label class="control-label" for="prefix">Prefix</label>
+            <input class="form-control" type="text" name="prefix" id="prefix" placeholder="Enter a prefix" value="usr"
+                v-model="prefix">
+			<div class="text-danger">
+				{{# errors }}prefix{{/ errors }}
+			</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="control-label" for="separator">Separator</label>
+            <input class="form-control" type="text" name="separator" id="separator" placeholder="Enter a separator"
+                maxlength="1" value="-" v-model="separator">
+			<div class="text-danger">
+				{{# errors }}separator{{/ errors }}
+			</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="control-label" for="start">Where does it start? *</label>
+            <input class="form-control" type="number" name="start" id="start" placeholder="Enter a number" min="1"
+                value="1" v-model="start" required>
+			<div class="invalid-feedback">
+				This field is required
+			</div>
+			<div class="text-danger">
+				{{# errors }}start{{/ errors }}
+			</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="control-label" for="count">How many? *</label>
+            <input class="form-control" type="number" name="count" id="count" placeholder="Enter a number" min="1"
+                value="1" v-model="count" required>
+			<div class="invalid-feedback">
+				This field is required
+			</div>
+			<div class="text-danger">
+				{{# errors }}count{{/ errors }}
+			</div>
+        </div>
+
+		<div class="mb-3">
+			<label class="control-label" for="unique">Use a unique password for all</label>
+			<br/>
+			<label class="switch">
+				<input type="checkbox" name="unique" id="unique" :checked="unique"
+  					@input="unique = $event.target.checked">
+				<span class="slider round"></span>
+			</label>
+			<div class="text-danger">
+				{{# errors }}unique{{/ errors }}
+			</div>
+		</div>
+
+		<div v-show="unique" class="mb-3">
+			<label class="control-label" for="password">New password</label>
+			<i class="icon fa fa-eye fa-fw" id="eye" @click="showPass()"></i>
+			<input class="form-control" type="password" name="password" id="password" placeholder="Click to enter text 🖊">
+			<div class="text-danger">
+				{{# errors }}password{{/ errors }}
+			</div>
+		</div>
+
+        <div class="mb-3">
+            <p>
+                Create users from <b>`${prefix}${separator}${start}`</b> to <b>`${prefix}${separator}${sum}`</b>
+            </p>
+        </div>
+
+        <div id="spinner" class="mb-3 text-center" style="display: none;">
+            <i class="fa fa-spinner fa-3x fa-pulse"></i>
+            <p>Wait, in progress...</p>
+        </div>
+
+        <div class="mb-3">
+            <button id="btnSubmit" type="submit" class="btn btn-primary">SUBMIT</button>
+        </div>
+    </form>
+</div>
+
+<style>
+.switch{position:relative;display:inline-block;width:60px;height:34px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#ccc;-webkit-transition:.4s;transition:.4s}
+.slider:before{position:absolute;content:"";height:26px;width:26px;left:4px;bottom:4px;background-color:#fff;-webkit-transition:.4s;transition:.4s}
+input:checked+.slider{background-color:#2196f3}
+input:focus+.slider{box-shadow:0 0 1px #2196f3}
+input:checked+.slider:before{-webkit-transform:translateX(26px);-ms-transform:translateX(26px);transform:translateX(26px)}
+.slider.round{border-radius:34px}
+.slider.round:before{border-radius:50%}
+</style>
+{{/ content }}
+
+{{$ scripts }}
+{{! development version, includes helpful console warnings }}
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        delimiters: ['${', '}'],
+        data: function () {
+            return {
+                prefix: 'usr',
+				separator: '-',
+				start: 1,
+				count: 1,
+				unique: false
+            }
+        },
+        methods: {
+			showPass: function () {
+				const input = document.querySelector('#password')
+				const eye = document.querySelector('#eye')
+
+				if (input.type == 'password') {
+					input.type = 'text'
+					eye.style.color = 'blue'
+				} else {
+					input.type = 'password'
+					eye.style.color = '#868ba1'
+				}
+			},
+            onSubmit: function () {
+				var form = document.querySelector("#form")
+
+				form.classList.add('was-validated')
+
+				if (form.checkValidity()) {
+					swal({
+						text: "Are you sure you want to do this?",
+						icon: "warning",
+						buttons: true,
+						dangerMode: true
+					})
+					.then((value) => {
+						if (value) {
+							document.querySelector('#btnSubmit').disabled = true
+							document.querySelector('#spinner').style.display = 'block'
+							form.submit()
+						}
+					})
+				}
+            }
+        },
+        computed: {
+            sum: function () {
+                return parseInt(this.start) + (parseInt(this.count) - 1)
+            }
+        }
+    })
+</script>
+{{/ scripts }}
+{{/ layout }}

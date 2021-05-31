@@ -1,0 +1,68 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+
+{{% BLOCKS }}
+{{% FILTERS }}
+
+<nav class="navbar navbar-expand navbar-light navbar-bg">
+	<a class="sidebar-toggle js-sidebar-toggle">
+		<i class="hamburger align-self-center"></i>
+	</a>
+
+	<div class="navbar-collapse collapse">
+		<ul class="navbar-nav navbar-align">
+			<li class="nav-item dropdown">
+				<a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#" data-bs-toggle="dropdown">
+					<i class="align-middle" data-feather="settings"></i>
+				</a>
+
+				<a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-bs-toggle="dropdown">
+					<img src="https://www.gravatar.com/avatar/{{ USER.email | md5 }}?s=500"
+						class="avatar img-fluid rounded me-1" />
+					<span class="text-dark">
+						{{ USER.firstname }} {{ USER.lastname }}
+					</span>
+				</a>
+				<div class="dropdown-menu dropdown-menu-end">
+					<a href="{{ site_url }}/my/" class="dropdown-item">
+						<i class="align-middle me-1" data-feather="sliders"></i> Dashboard
+					</a>
+					<div class="dropdown-divider"></div>
+					<a href="{{ site_url }}/?redirect=0" class="dropdown-item">
+						<i class="align-middle me-1" data-feather="home"></i> Site home
+					</a>
+					<a href="{{ site_url }}/user/profile.php?id={{ USER.id }}" class="dropdown-item">
+						<i class="align-middle me-1" data-feather="user"></i> Profile
+					</a>
+					<a href="{{ site_url }}/grade/report/overview/index.php" class="dropdown-item">
+						<i class="align-middle me-1" data-feather="grid"></i> Grades
+					</a>
+					<a href="{{ site_url }}/message/index.php" class="dropdown-item">
+						<i class="align-middle me-1" data-feather="message-circle"></i> Messages
+					</a>
+					<a href="{{ site_url }}/user/preferences.php" class="dropdown-item">
+						<i class="align-middle me-1" data-feather="settings"></i> Preferences
+					</a>
+					<div class="dropdown-divider"></div>
+					<a href="{{ site_url }}/login/logout.php?sesskey={{ USER.sesskey }}" class="dropdown-item">
+						<i class="align-middle me-1" data-feather="log-out"></i> Log Out
+					</a>
+				</div>
+			</li>
+		</ul>
+	</div>
+</nav>

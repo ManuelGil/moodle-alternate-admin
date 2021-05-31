@@ -1,0 +1,224 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+
+{{% BLOCKS }}
+{{< layout }}
+
+{{$ title }}Dynamic Unenrollment{{/ title }}
+
+{{$ stylesheets }}
+{{/ stylesheets }}
+
+{{$ pageheader }}Dynamic Unenrollment{{/ pageheader }}
+
+{{$ alerts }}
+{{# message }}success{{/ message }}
+{{# message }}danger{{/ message }}
+{{# message }}info{{/ message }}
+{{/ alerts }}
+
+{{$ content }}
+<div class="card-header">
+	<h5 class="card-title mb-0">Unenroll users or courses</h5>
+</div>
+<div id="app" class="card-body">
+    <form class="row g-3" id="form" method="post" @submit.prevent="onSubmit" novalidate>
+		<div class="mb-3">
+			<label class="control-label" for="search">Search *</label>
+			<select name="search" id="search" v-model="search" required>
+				<option data-placeholder="true"></option>
+				<option value="course">Course</option>
+				<option value="user">User</option>
+			</select>
+			<div class="invalid-feedback">
+				This field is required
+			</div>
+			<div class="text-danger">
+				{{# errors }}search{{/ errors }}
+			</div>
+		</div>
+
+		<div v-show="search == 'course'">
+			<div class="mb-3">
+				<label class="control-label" for="courseSelector">Courses</label>
+				<select name="course" id="courseSelector">
+					<option data-placeholder="true"></option>
+                	<option v-for="course in courses" :value="course.id">
+                	    ${ course.fullname } - ${ course.shortname }
+                	</option>
+				</select>
+			</div>
+
+			<div class="mb-3">
+				<label class="control-label" for="usersSelector">Users</label>
+				<select name="users[]" id="usersSelector" multiple>
+				</select>
+			</div>
+		</div>
+
+		<div v-show="search == 'user'">
+			<div class="mb-3">
+				<label class="control-label" for="userSelector">Users</label>
+				<select name="user" id="userSelector">
+					<option data-placeholder="true"></option>
+	                <option v-for="user in users" :value="user.id">
+	                    ${ user.username } - ${ user.firstname } ${ user.lastname } - ${ user.email }
+	                </option>
+				</select>
+			</div>
+
+			<div class="mb-3">
+				<label class="control-label" for="coursesSelector">Courses</label>
+				<select name="courses[]" id="coursesSelector" multiple>
+				</select>
+			</div>
+		</div>
+
+        <div id="spinner" class="mb-3 text-center" style="display: none;">
+            <i class="fa fa-spinner fa-3x fa-pulse"></i>
+            <p>Wait, in progress...</p>
+        </div>
+
+        <div class="mb-3">
+            <button id="btnSubmit" type="submit" class="btn btn-primary">SUBMIT</button>
+        </div>
+    </form>
+</div>
+{{/ content }}
+
+{{$ scripts }}
+{{! development version, includes helpful console warnings }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.27.0/slimselect.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.27.0/slimselect.min.css" rel="stylesheet"></link>
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        delimiters: ['${', '}'],
+        data: function () {
+            return {
+				search: ''
+            }
+        },
+        created: function () {
+            this.load()
+        },
+        mounted: function () {
+            new SlimSelect({
+                select: document.querySelector('#search'),
+                placeholder: 'Select an option',
+                hideSelectedOption: true,
+                closeOnSelect: true
+            })
+
+    		new SlimSelect({
+    		    select: document.querySelector('#courseSelector'),
+    		    placeholder: 'Select a course',
+    		    hideSelectedOption: true,
+    		    closeOnSelect: true,
+    		    onChange: (info) => {
+    		        if (info.value) {
+    		            axios.get(`{{ base_url }}courses/list-users/${info.value}`)
+    		                .then(response => {
+    		                    if (response.status == 200) {
+    		                        const users = Object.values(response.data).map(user => {
+    		                            return {
+    		                                value: user.id,
+    		                                text: `${user.username} - ${user.firstname} ${user.lastname} - ${user.email} - ${user.role}`
+    		                            }
+    		                        })
+    		                        usersSelector.setData(users)
+    		                    }
+    		                })
+    		        }
+    		    }
+    		})
+
+    		var usersSelector = new SlimSelect({
+    		    select: document.querySelector('#usersSelector'),
+    		    placeholder: 'Select an user',
+    		    hideSelectedOption: true,
+    		    closeOnSelect: false
+    		})
+
+    		new SlimSelect({
+    		    select: document.querySelector('#userSelector'),
+    		    placeholder: 'Select a user',
+    		    hideSelectedOption: true,
+    		    closeOnSelect: true,
+    		    onChange: (info) => {
+    		        if (info.value) {
+    		            axios.get(`{{ base_url }}users/list-courses/${info.value}`)
+                    	    .then(response => {
+                    	        if (response.status == 200) {
+    		                        const courses = Object.values(response.data).map(course => {
+    		                            return {
+    		                                value: course.id,
+    		                                text: `${course.fullname} - ${course.shortname}`
+    		                            }
+    		                        })
+    		                        coursesSelector.setData(courses)
+                    	        }
+    		                })
+    		        }
+    		    }
+    		})
+
+    		var coursesSelector = new SlimSelect({
+    		    select: document.querySelector('#coursesSelector'),
+    		    placeholder: 'Select a course',
+    		    hideSelectedOption: true,
+    		    closeOnSelect: false
+    		})
+        },
+        methods: {
+			load: function () {
+    			this.courses = JSON.parse("{{{ courses }}}")
+    			this.users = JSON.parse("{{{ users }}}")
+			},
+            onSubmit: function () {
+				var form = document.querySelector("#form")
+
+				form.classList.add('was-validated')
+
+				if (form.checkValidity()) {
+					swal({
+						text: "Are you sure you want to do this?",
+						icon: "warning",
+						buttons: true,
+						dangerMode: true
+					})
+					.then((value) => {
+						if (value) {
+							document.querySelector('#btnSubmit').disabled = true
+							document.querySelector('#spinner').style.display = 'block'
+							form.submit()
+						}
+					})
+				}
+            }
+        }
+    })
+</script>
+{{/ scripts }}
+{{/ layout }}

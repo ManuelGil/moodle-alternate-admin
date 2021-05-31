@@ -1,0 +1,323 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+
+{{% BLOCKS }}
+{{< layout }}
+
+{{$ title }}Edit User{{/ title }}
+
+{{$ stylesheets }}
+{{/ stylesheets }}
+
+{{$ pageheader }}Edit User{{/ pageheader }}
+
+{{$ alerts }}
+{{# message }}success{{/ message }}
+{{# message }}danger{{/ message }}
+{{# message }}info{{/ message }}
+{{/ alerts }}
+
+{{$ content }}
+<div class="card-header">
+	<h5 class="card-title mb-0">Edit User</h5>
+</div>
+<div id="app" class="card-body">
+    <form class="row g-3" id="form" method="post" @submit.prevent="onSubmit" novalidate>
+        <div class="mb-3">
+            <label class="control-label" for="userid">Users *</label>
+            <select name="userid" id="userid" v-model="userid" required>
+				<option data-placeholder="true"></option>
+                <option v-for="user in users" :value="user.id">
+                    ${ user.username } - ${ user.firstname } ${ user.lastname } - ${ user.email }
+                </option>
+            </select>
+			<div class="invalid-feedback">
+				This field is required
+			</div>
+			<div class="text-danger">
+				{{# errors }}userid{{/ errors }}
+			</div>
+        </div>
+
+		<div v-show="userid != ''">
+			<div class="mb-3">
+				<label class="control-label" for="username">Username *</label>
+				<input class="form-control" type="text" name="username" id="username" required>
+				<div class="invalid-feedback">
+					This field is required
+				</div>
+			</div>
+
+	        <div class="mb-3">
+	            <label class="control-label" for="auth">Choose an authentication method *</label>
+	            <select name="auth" id="auth" required>
+	                <option v-for="auth in plugins" :value="auth">
+	                    ${ auth }
+	                </option>
+	            </select>
+				<div class="invalid-feedback">
+					This field is required
+				</div>
+	        </div>
+
+			<div class="mb-3">
+				<label class="control-label" for="suspended">Suspended account</label>
+				<br/>
+				<label class="switch">
+					<input type="checkbox" name="suspended" id="suspended">
+					<span class="slider round"></span>
+				</label>
+			</div>
+
+			<div class="mb-3">
+				<label class="control-label" for="password">New password</label>
+				<i class="icon fa fa-eye fa-fw" id="eye" @click="showPass()"></i>
+				<input class="form-control" type="password" name="password" id="password" placeholder="Click to enter text 🖊">
+			</div>
+
+			<div class="mb-3">
+				<label class="control-label" for="forcepasschange">Force password change</label>
+				<br/>
+				<label class="switch">
+					<input type="checkbox" name="forcepasschange" id="forcepasschange">
+					<span class="slider round"></span>
+				</label>
+			</div>
+
+			<div class="mb-3">
+				<label class="control-label" for="firstname">First name *</label>
+				<input class="form-control" type="text" name="firstname" id="firstname" required>
+				<div class="invalid-feedback">
+					This field is required
+				</div>
+			</div>
+
+			<div class="mb-3">
+				<label class="control-label" for="lastname">Surname *</label>
+				<input class="form-control" type="text" name="lastname" id="lastname" required>
+				<div class="invalid-feedback">
+					This field is required
+				</div>
+			</div>
+
+			<div class="mb-3">
+				<label class="control-label" for="email">Email address *</label>
+				<input class="form-control" type="email" name="email" id="email" required>
+				<div class="invalid-feedback">
+					This field is required
+				</div>
+			</div>
+
+			<div class="mb-3">
+				<label class="control-label" for="maildisplay">Email display</label>
+				<select name="maildisplay" id="maildisplay">
+					<option value="0">Hide my email address from non-privileged users</option>
+					<option value="1">Allow everyone to see my email address</option>
+					<option value="2">Allow only other course members to see my email address</option>
+				</select>
+			</div>
+
+			<div class="mb-3">
+				<label class="control-label" for="moodlenetprofile">MoodleNet profile</label>
+				<input class="form-control" type="text" name="moodlenetprofile" id="moodlenetprofile">
+			</div>
+
+			<div class="mb-3">
+				<label class="control-label" for="city">City/town</label>
+				<input class="form-control" type="text" name="city" id="city">
+			</div>
+
+	        <div class="mb-3">
+	            <label class="control-label" for="country">Select a country *</label>
+	            <select name="country" id="country" required>
+					<option data-placeholder="true"></option>
+	                <option v-for="(country, index) in countries" :value="index">
+	                    ${ country }
+	                </option>
+	            </select>
+				<div class="invalid-feedback">
+					This field is required
+				</div>
+	        </div>
+
+	        <div class="mb-3">
+	            <label class="control-label" for="timezone">Timezone *</label>
+	            <select name="timezone" id="timezone" required>
+					<option data-placeholder="true"></option>
+	                <option v-for="(timezone, index) in timezones" :value="index">
+	                    ${ timezone }
+	                </option>
+	            </select>
+				<div class="invalid-feedback">
+					This field is required
+				</div>
+	        </div>
+		</div>
+
+        <div id="spinner" class="mb-3 text-center" style="display: none;">
+            <i class="fa fa-spinner fa-3x fa-pulse"></i>
+            <p>Wait, in progress...</p>
+        </div>
+
+        <div class="mb-3">
+            <button id="btnSubmit" type="submit" class="btn btn-primary">SUBMIT</button>
+        </div>
+    </form>
+</div>
+
+<style>
+.switch{position:relative;display:inline-block;width:60px;height:34px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#ccc;-webkit-transition:.4s;transition:.4s}
+.slider:before{position:absolute;content:"";height:26px;width:26px;left:4px;bottom:4px;background-color:#fff;-webkit-transition:.4s;transition:.4s}
+input:checked+.slider{background-color:#2196f3}
+input:focus+.slider{box-shadow:0 0 1px #2196f3}
+input:checked+.slider:before{-webkit-transform:translateX(26px);-ms-transform:translateX(26px);transform:translateX(26px)}
+.slider.round{border-radius:34px}
+.slider.round:before{border-radius:50%}
+</style>
+{{/ content }}
+
+{{$ scripts }}
+{{! development version, includes helpful console warnings }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.27.0/slimselect.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.27.0/slimselect.min.css" rel="stylesheet"></link>
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        delimiters: ['${', '}'],
+        data: function () {
+            return {
+				users: [],
+				plugins: [],
+				countries: [],
+				timezones: [],
+				userid: ''
+            }
+        },
+        created: function () {
+            this.load()
+        },
+        mounted: function () {
+            new SlimSelect({
+                select: document.querySelector('#userid'),
+                placeholder: 'Select an user',
+                hideSelectedOption: true,
+                closeOnSelect: true,
+				onChange: (info) => {
+                    axios.get(`{{ base_url }}users/user-data/${info.value}`)
+                        .then(response => {
+                            if (response.status == 200) {
+								let user = response.data
+
+								document.querySelector('#username').value = user.username
+								document.querySelector('#suspended').checked = (user.suspended == 1)
+								document.querySelector('#firstname').value = user.firstname
+								document.querySelector('#lastname').value = user.lastname
+								document.querySelector('#email').value = user.email
+								document.querySelector('#moodlenetprofile').value = user.moodlenetprofile
+								document.querySelector('#city').value = user.city
+								document.querySelector('#password').value = ''
+								authentication.set(user.auth)
+								maildisplay.set(user.maildisplay)
+								country.set(user.country)
+								timezone.set(user.timezone)
+                            }
+                        })
+				}
+            })
+
+            var authentication = new SlimSelect({
+                select: document.querySelector('#auth'),
+                placeholder: 'Select a method',
+                hideSelectedOption: true,
+                closeOnSelect: true,
+            })
+
+            var maildisplay = new SlimSelect({
+                select: document.querySelector('#maildisplay'),
+                placeholder: 'Select an option',
+                hideSelectedOption: true,
+                closeOnSelect: true,
+            })
+
+            var country = new SlimSelect({
+                select: document.querySelector('#country'),
+                placeholder: 'Select a country',
+                hideSelectedOption: true,
+                closeOnSelect: true,
+            })
+
+            var timezone = new SlimSelect({
+                select: document.querySelector('#timezone'),
+                placeholder: 'Select a timezone',
+                hideSelectedOption: true,
+                closeOnSelect: true,
+            })
+        },
+        methods: {
+            load: function () {
+                this.users = JSON.parse("{{{ users }}}")
+                this.plugins = JSON.parse("{{{ authplugins }}}")
+                this.countries = JSON.parse("{{{ countries }}}")
+                this.timezones = JSON.parse("{{{ timezones }}}")
+            },
+			showPass: function () {
+				const input = document.querySelector('#password')
+				const eye = document.querySelector('#eye')
+
+				if (input.type == 'password') {
+					input.type = 'text'
+					eye.style.color = 'blue'
+				} else {
+					input.type = 'password'
+					eye.style.color = '#868ba1'
+				}
+			},
+            onSubmit: function () {
+				var form = document.querySelector("#form")
+
+				form.classList.add('was-validated')
+
+				if (form.checkValidity()) {
+					swal({
+						text: "Are you sure you want to do this?",
+						icon: "warning",
+						buttons: true,
+						dangerMode: true
+					})
+					.then((value) => {
+						if (value) {
+							document.querySelector('#btnSubmit').disabled = true
+							document.querySelector('#spinner').style.display = 'block'
+							form.submit()
+						}
+					})
+				}
+            }
+        }
+    })
+</script>
+{{/ scripts }}
+{{/ layout }}

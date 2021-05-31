@@ -1,0 +1,265 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+
+{{% BLOCKS }}
+{{% FILTERS }}
+
+<nav id="sidebar" class="sidebar js-sidebar">
+	<div class="sidebar-content js-simplebar">
+		<a class="sidebar-brand" href="{{ base_url }}">
+			<span class="align-middle">Site Administration</span>
+		</a>
+
+		<ul class="sidebar-nav">
+			<li class="sidebar-header">
+				Users
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}users/list-users" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						List Users
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}users/list-courses-user" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						List Courses By User
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}users/bulk-user-creation" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Bulk User Creation
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}users/edit-user" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Edit User
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}users/upload-users" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Upload Users
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}users/suspend-user" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Suspend User
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}users/switch-authentication" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Switch Authentication
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-header">
+				Courses
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}courses/list-courses" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						List Courses
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}courses/list-users-course" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						List User By Course
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}courses/bulk-course-creation" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Bulk Course Creation
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}courses/count-courses" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Count Courses
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}courses/count-with-role" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Count Role
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}courses/course-without-role" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Course Without Role
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-header">
+				Enrollments
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}enrollments/bulk-user-enrollment" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Bulk User Enrollment
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}enrollments/bulk-user-unenrollment" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Bulk User Unenrollment
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}enrollments/dynamic-unenrollment" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Dynamic Unenrollment
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}enrollments/switch-role" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Switch Role
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-header">
+				Activities
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}activities/count-activities" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Count Activities
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}activities/list-activities" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						List Activities
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-header">
+				Reports
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}reports/list-admins" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						List Admintrator Users
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}reports/users-created" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Users Created
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}reports/logged-once" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Logged Once
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}reports/logged-last-days" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						Logged Last Days
+					</span>
+				</a>
+			</li>
+
+			<li class="sidebar-item">
+				<a href="{{ base_url }}reports/list-suspended" class="sidebar-link">
+					<i class="align-middle" data-feather="arrow-right"></i>
+					<span class="align-middle">
+						List Suspended
+					</span>
+				</a>
+			</li>
+		</ul>
+	</div>
+</nav>
